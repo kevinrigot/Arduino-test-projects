@@ -12,3 +12,8 @@ Notes:
 How to use:
 1. Enroll some fingerprint. In src, you should have only 1 cpp. main_enroll.cpp
 2. Test your fingerprint. In src, you should have only 1 cpp. main_test.cpp
+
+Schemas:
+![Alt text](./schemas/NodeMcuFingerprint.png?raw=true "Breadboard")
+![Alt text](./schemas/photo1.jpg?raw=true "Photo1")
+![Alt text](./schemas/photo2.jpg?raw=true "Photo2")
