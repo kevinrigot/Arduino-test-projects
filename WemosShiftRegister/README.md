@@ -4,10 +4,10 @@ Reference:
 - https://www.youtube.com/watch?v=bqfPZXEuyuc
 
 Components:
-    - Wemos D1 Lite
-    - SN75HC595
-    - 4x Resistor 100 ohm
-    - 4x leds
+- Wemos D1 Lite
+- SN75HC595
+- 4x Resistor 100 ohm
+- 4x leds
 
 Schema:
 ![Alt text](./schemas/ShiftRegister_bb.png?raw=true "Breadboard")

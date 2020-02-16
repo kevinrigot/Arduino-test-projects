@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+    <h1>NodeMcu Webserver</h1>
+    <section id="setLed">
+        <INPUT type='radio' name='led' value='on' id="ledOn"><label for='ledOn'>ON</label>
+        <INPUT type='radio' name='led' value='off' id="ledOff"><label for='ledOff'>OFF</label>
+    </section>
+
+    <section>
+        <input type="text" id="sound" value="pno-cs.mp3" />
+        <input type="button" id="play" value="Play!" />
+    </section>
+    <section id="currentlyPlaying"></section>
+    <section id="status"></section>
+
+    <script>
+        $("input[name='led']").click(function () {
+            $.ajax({
+                url: '/led?status=' + $(this).val(),
+                type: 'put',
+                success: function (data) {
+                    $("#status").html("<p> Commande LED : " + data + "</p>");
+                    setTimeout(function(){ $("#status").html("")}, 2000);
+                    loadInfo();
+                }
+            });
+        });
+        $("#play").click(function () {
+            $.ajax({
+                url: '/play?sound=' + $("#sound").val(),
+                type: 'put',
+                success: function (data) {
+                    $("#status").html("<p> Sound playing : " + data + "</p>");
+                    setTimeout(function(){ $("#status").html("")}, 2000);
+                    loadInfo();
+                }
+            });
+        });
+        function loadInfo() {
+            $.ajax({
+                url: '/status',
+                type: 'get',
+                success: function (data) {
+                    if(data.sound && data.sound != ""){
+                        $("#currentlyPlaying").html("Playing " + data.sound);
+                    }else{
+                        $("#currentlyPlaying").html("");
+                    }
+                    $("input[name='led'][value='on']").prop("checked", data.ledIsOn);
+                    $("input[name='led'][value='off']").prop("checked", !data.ledIsOn);
+                }
+            });
+        }
+
+        loadInfo(); // premiere execution
+        setInterval(function () {
+            loadInfo() // rappel toutes les 10 secondes
+        }, 10000);
+    </script>
+
+</body>
+
+</html>
