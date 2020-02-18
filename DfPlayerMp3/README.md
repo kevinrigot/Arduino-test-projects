@@ -10,5 +10,5 @@ Components:
 
 
 Schema:
-![Alt text](./schemas/DfPlayerMini_bb.png?raw=true "Breadboard")
-![Alt text](./schemas/DfPlayer.jpg?raw=true "Photo1")
+![Alt text](./schemas/DfplayerMini_bb.png?raw=true "Breadboard")
+![Alt text](./schemas/dfplayer.jpg?raw=true "Photo1")
