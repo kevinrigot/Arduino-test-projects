@@ -1,10 +1,10 @@
+#pragma once
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266HTTPClient.h>
-#include <ArduinoJson.h>
+#include <shelly-dimmer.h>
 
 const String APP_NAME = "ShellyDimmerRemote - " __FILE__;
-const String APP_VERSION = "v0.1-" __DATE__ " " __TIME__;
+const String APP_VERSION = "v0.2-" __DATE__ " " __TIME__;
 
 #define IS_ON_LED D1
 #define TURN_ON_SWITCH D2
@@ -21,6 +21,7 @@ int DEBOUNCE_TIME = 500;
 #endif
 
 WiFiClient client;
+ShellyDimmer* shellyDimmerService = new ShellyDimmer("http://192.168.1.99", true);
 
 
 void connectWifi(){
@@ -37,51 +38,6 @@ void connectWifi(){
   Serial.println("WiFi connected");
 }
 
-String url = "http://192.168.1.99/status";
-boolean getStatus(){
-  Serial.print("Requesting URL: ");
-  Serial.println(url);
-  HTTPClient http;
-  WiFiClient client;
-  http.begin(client, url);
-  int httpCode = http.GET();
-   
-  DynamicJsonDocument doc(2048);
-  bool lightIsOn = false;
-  if (httpCode > 0) { 
-    DeserializationError error = deserializeJson(doc, http.getStream());   
-    if (error) {
-      Serial.print(F("deserializeJson() failed: "));
-      Serial.println(error.f_str());     
-    }else{
-      lightIsOn = doc["lights"][0]["ison"];
-      Serial.print("Light is currently ");
-      Serial.println(lightIsOn ? "on" : "off");
-    }    
-  }
-
-  http.end();
-  return lightIsOn;
-}
-
-String urlAction = "http://192.168.1.99/light/0?";
-void sendAction(bool turnOn, int brightness){
-  String fullUrl = urlAction + "turn=" + (turnOn ? "on" : "off")+ "&brightness="+brightness;
-  Serial.print("Requesting URL: ");
-  Serial.println(fullUrl);
-  HTTPClient http;
-  WiFiClient client;
-  http.begin(client, fullUrl);
-  int httpCode = http.GET();
-   
-  if (httpCode == 200) {     
-    Serial.println("Command accepted");
-  }else{
-    Serial.print("Error! Command not accepted. Error code: ");
-    Serial.println(httpCode);
-  }
-  http.end();
-}
 
 boolean isActive = false;
 bool previousIsActive = false;
@@ -94,7 +50,7 @@ void setup() {
   pinMode(IS_ON_LED, OUTPUT);
   pinMode(TURN_ON_SWITCH, INPUT);
   pinMode(BRIGHTNESS_POT, INPUT);  
-  isActive = getStatus();
+  isActive = shellyDimmerService->getStatus();
   previousIsActive = isActive;
   digitalWrite(IS_ON_LED, isActive ? HIGH : LOW);
 }
@@ -132,7 +88,7 @@ void loop() {
   }
   if(changeDetected && (debounceRequest + DEBOUNCE_TIME < millis())){
     if(brightness == 0)isActive = false;
-    sendAction(isActive, brightness);  
+    shellyDimmerService->sendAction(isActive, brightness);  
     changeDetected = false;
   }
   delay(100);
