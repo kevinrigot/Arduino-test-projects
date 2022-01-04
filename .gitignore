@@ -1,3 +1,4 @@
 projects.code-workspace
 NodeMcuWebServerMp3/data/scorpions.mp3
 **/.vscode/*
+**/extensions.json

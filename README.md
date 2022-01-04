@@ -14,3 +14,7 @@ IDE : https://platformio.org/
 - [ShiftRegister](./WemosShiftRegister)
 - [Analog Multiplexer](./WemosAnalogMultiplex)
 - [Webserver Spiffs Mp3](./WebserverSpiffsMp3)
+
+## Shelly Dimmer remote
+- [Shelly Dimmer Remote](./ShellyDimmerRemote)
+- [Shelly Dimmer Remote with Rotary Encoder](./ShellyDimmerRemoteRotary)
