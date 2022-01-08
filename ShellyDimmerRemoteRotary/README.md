@@ -8,6 +8,9 @@ Components:
 - Shelly Dimmer 2
 - Led, resistors
 
+OTA Instruction:
+1. First upload the code. Make sure the upload_protocol and upload_port in platformio.ini are commented.
+2. Upload over the air by enabling the upload_protocol and upload_port in platformio.ini. Make sure to have the correct ip.
 
 Schema:
 ![Alt text](./schema/Schema_bb_png?raw=true "Breadboard")

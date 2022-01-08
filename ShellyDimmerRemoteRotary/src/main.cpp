@@ -3,9 +3,11 @@
 #include <ESP8266WiFi.h>
 #include <RotaryEncoder.h>
 #include <shelly-dimmer.h>
+#include <JeVe_EasyOTA.h>
 
 const String APP_NAME = "ShellyDimmerRemoteRotary - " __FILE__;
 const String APP_VERSION = "v0.1-" __DATE__ " " __TIME__;
+
 
 #ifndef WIFI_SSID
 #define WIFI_SSID "(WIFI_SSID not defined)"
@@ -14,6 +16,7 @@ const String APP_VERSION = "v0.1-" __DATE__ " " __TIME__;
 #define WIFI_PASSWORD "(WIFI_PASSWORD not defined)"
 #endif
 #define ARDUINO_HOSTNAME "ShellyDimmerRemoteRotary"
+EasyOTA OTA(ARDUINO_HOSTNAME);
 // Set your Static IP address
 IPAddress local_IP(192, 168, 1, 90);
 // Set your Gateway IP address
@@ -84,6 +87,16 @@ void setup() {
   Serial.begin(115200);
   Serial.println(APP_NAME);
   Serial.println(APP_VERSION);
+   // This callback will be called when EasyOTA has anything to tell you.
+  OTA.onMessage([](const String &message, int line) {
+    Serial.println(message);
+  });
+  // Add networks you wish to connect to
+  OTA.addAP(WIFI_SSID, WIFI_PASSWORD);
+  // Allow open networks.
+  // NOTE: gives priority to configured networks
+  OTA.allowOpen(false);
+
   pinMode(PIN_LED, OUTPUT);
   pinMode(PIN_BUTTON, INPUT);
 
@@ -130,7 +143,9 @@ unsigned long debounceButton = 0;
 bool changeDetected = false;
 static int pos = 0;
 int previousPos = 0;
+
 void loop() {
+  OTA.loop();
   encoder.tick();
   int newPos = encoder.getPosition();
   
