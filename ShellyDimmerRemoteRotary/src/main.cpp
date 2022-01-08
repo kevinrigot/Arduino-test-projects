@@ -13,6 +13,13 @@ const String APP_VERSION = "v0.1-" __DATE__ " " __TIME__;
 #ifndef WIFI_PASSWORD
 #define WIFI_PASSWORD "(WIFI_PASSWORD not defined)"
 #endif
+#define ARDUINO_HOSTNAME "ShellyDimmerRemoteRotary"
+// Set your Static IP address
+IPAddress local_IP(192, 168, 1, 90);
+// Set your Gateway IP address
+IPAddress gateway(192, 168, 1, 1);
+
+IPAddress subnet(255, 255, 0, 0);
 
 #if defined(ARDUINO_AVR_UNO) || defined(ARDUINO_AVR_NANO_EVERY)
 // Example for Arduino UNO with input signals on pin 2 and 3
@@ -43,7 +50,10 @@ int status = LOW;
 void connectWifi(){
   Serial.print("Connection to ");
   Serial.println(WIFI_SSID);
-
+  if (!WiFi.config(local_IP, gateway, subnet)) {
+    Serial.println("STA Failed to configure");
+  }
+  WiFi.hostname(ARDUINO_HOSTNAME);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -54,6 +64,7 @@ void connectWifi(){
   }
   Serial.println("");
   Serial.println("WiFi connected");
+  Serial.println(WiFi.localIP());
   for(int i=0; i< 4; i++){
     digitalWrite(PIN_LED, HIGH);
     delay(100);
@@ -78,9 +89,9 @@ void setup() {
 
   connectWifi();
 
-  isActive = shellyDimmerService->getStatus();
-  //TODO
-  previousBrightness = 50;
+  Status* status = shellyDimmerService->getCurrentStatus();
+  isActive = status->isOn();
+  previousBrightness = status->getBrightness();
   previousIsActive = isActive;
   digitalWrite(PIN_LED, isActive ? HIGH : LOW);
 }
@@ -115,6 +126,7 @@ int getNewBrightness(int previousBrightness, int changePos){
 
 
 unsigned long debounce = 0;
+unsigned long debounceButton = 0;
 bool changeDetected = false;
 static int pos = 0;
 int previousPos = 0;
@@ -132,12 +144,12 @@ void loop() {
     pos = newPos;  
   }
 
-
-  if(debounce + DEBOUNCE_BUTTON_TIME < millis()){
+  //Do not listen button input if pushed recently (last 2sec)
+  if(debounceButton + DEBOUNCE_BUTTON_TIME < millis()){
     int res = digitalRead(PIN_BUTTON);
     if(res == HIGH){
       Serial.print("Bouton pressed!");
-      debounce = millis();
+      debounceButton = millis();
       isActive = !isActive;
       digitalWrite(PIN_LED, isActive ? HIGH : LOW);
     }

@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
+#include <status.h>
 
 class ShellyDimmer{
     private:
@@ -19,10 +20,10 @@ class ShellyDimmer{
                 statusUrl = host + "/status";
                 actionUrl = host + "/light/0";
         }
-        boolean getStatus(){
+        Status* getCurrentStatus(){
             Serial.print("Requesting URL: ");
             Serial.println(statusUrl);
-            if(debug)return true;
+            if(debug)return new Status(true, 50);
             HTTPClient http;
             WiFiClient client;
             http.begin(client, statusUrl);
@@ -30,8 +31,10 @@ class ShellyDimmer{
             
             DynamicJsonDocument doc(2048);
             bool lightIsOn = false;
+            int brightness = 0;
             if (httpCode > 0) { 
                 DeserializationError error = deserializeJson(doc, http.getStream());   
+                http.end();
                 if (error) {
                     Serial.print(F("deserializeJson() failed: "));
                     Serial.println(error.f_str());     
@@ -39,14 +42,17 @@ class ShellyDimmer{
                     lightIsOn = doc["lights"][0]["ison"];
                     Serial.print("Light is currently ");
                     Serial.println(lightIsOn ? "on" : "off");
+                    brightness = doc["lights"][0]["brightness"];
+                    Serial.print("Brightness is currently ");
+                    Serial.println(brightness);
+                    return new Status(lightIsOn, brightness);
                 }    
             }else{
                 Serial.print("Error! Command not accepted. Error code: ");
                 Serial.println(httpCode); 
+                http.end();
             }
-
-            http.end();
-            return lightIsOn;
+            return NULL;
         }
 
         void sendAction(bool turnOn, int brightness){
@@ -68,3 +74,4 @@ class ShellyDimmer{
             http.end();
         }
 };
+
